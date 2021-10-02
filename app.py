@@ -6,7 +6,7 @@ import random
 from sqlalchemy.dialects import postgresql
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://kamila@localhost:5432/dictionary'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://joanna:dict@localhost:5432/dictionary'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -26,16 +26,11 @@ db.create_all()
 
 @app.route('/')
 def index():
-    rand = db.session.query(func.count(Todo.id)).scalar()
-    random_number = random.randrange(0, rand)
+    max_value = db.session.query(func.count(Todo.id)).scalar()
+    random_number = random.randrange(0, max_value)
+    output = Todo.query.get(random_number)
 
-    stmt = select([Todo.__table__.columns.description1, Todo.__table__.columns.description2])
-    stmt = stmt.where(and_(Todo.id == random_number))
-    result = stmt.compile(dialect=postgresql.dialect())
-    print (result)
-    # print(stmt)
-
-    return render_template('index.html', rand=rand, random_number=random_number, result=result)
+    return render_template('index.html', output=output)
 
 
 if __name__ == '__main__':
